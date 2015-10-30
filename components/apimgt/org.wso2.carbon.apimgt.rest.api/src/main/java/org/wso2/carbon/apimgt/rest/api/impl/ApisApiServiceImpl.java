@@ -58,9 +58,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider();
             /*String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-               // isTenantFlowStarted = true;
+           /* if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                // PrivilegedCarbonContext.startTenantFlow();
+               // isTenantFlowStarted = true;
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
@@ -88,8 +88,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
             APIProvider apiProvider = RestApiUtil.getProvider();
            /* if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
@@ -131,9 +131,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider();
            /* String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
+           /* if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
@@ -174,9 +174,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider();
             /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
+            /*if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             } */
@@ -217,9 +217,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider();
             /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
+         /*   if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
@@ -244,9 +244,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider();
             /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
+          /*  if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/

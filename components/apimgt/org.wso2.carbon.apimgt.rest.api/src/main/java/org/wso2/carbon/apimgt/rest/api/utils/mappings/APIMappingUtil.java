@@ -22,7 +22,14 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -38,6 +45,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This class is used as a util class to map corresponding DTOs from REST API side with
+ * attributes in org.wso2.carbon.apimgt.api.model.API and
+ * org.wso2.carbon.apimgt.api.model.Documentation
+ */
 public class APIMappingUtil {
 
     public static APIIdentifier getAPIIdentifier(String apiId){
@@ -49,6 +61,13 @@ public class APIMappingUtil {
         return new APIIdentifier(providerNameEmailReplaced, apiName, version);
     }
 
+    /**
+     * Map API backend model with DTO
+     *
+     * @param model API backend model
+     * @return Corresponding mapping DTO for the input model
+     * @throws APIManagementException If an errors occurs while mapping model to DTO
+     */
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getProvider();
@@ -60,7 +79,6 @@ public class APIMappingUtil {
         dto.setId(model.getUUID());
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
-
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
@@ -69,7 +87,7 @@ public class APIMappingUtil {
         List<SequenceDTO> sequences = null;
 
         String inSequenceName = model.getInSequence();
-        if (inSequenceName != null && !inSequenceName.isEmpty()) {
+        if (!StringUtils.isEmpty(inSequenceName)) {
             SequenceDTO inSequence = new SequenceDTO();
             inSequence.setName(inSequenceName);
             inSequence.setType("IN");
@@ -77,7 +95,7 @@ public class APIMappingUtil {
         }
 
         String outSequenceName = model.getOutSequence();
-        if (outSequenceName != null && !outSequenceName.isEmpty()) {
+        if (!StringUtils.isEmpty(outSequenceName)) {
             SequenceDTO outSequence = new SequenceDTO();
             outSequence.setName(outSequenceName);
             outSequence.setType("OUT");
@@ -85,7 +103,7 @@ public class APIMappingUtil {
         }
 
         String faultSequenceName = model.getFaultSequence();
-        if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
+        if (!StringUtils.isEmpty(faultSequenceName)) {
             SequenceDTO faultSequence = new SequenceDTO();
             faultSequence.setName(faultSequenceName);
             faultSequence.setType("FAULT");
@@ -101,15 +119,12 @@ public class APIMappingUtil {
             dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
         }
 
-        //do we need to put validity checks? - specific_tenants
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
         }
 
-        //Get Swagger definition which has URL templates, scopes and resource details
-        String apiSwaggerDefinition;
-
-        apiSwaggerDefinition = apiProvider.getSwagger20Definition(model.getId());
+        //Swagger definition will contain details about URI Templates, scopes and resources
+        String apiSwaggerDefinition = apiProvider.getSwagger20Definition(model.getId());
 
         dto.setApiDefinition(apiSwaggerDefinition);
 
@@ -126,21 +141,25 @@ public class APIMappingUtil {
         dto.setTiers(tiersToReturn);
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
-        //dto.setType("");   //how to get type?
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
-        //do we need to put validity checks? - restricted
         if (model.getVisibleRoles() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
         }
-        //do we need to put validity checks? - controlled
+
         if (model.getVisibleTenants() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
 
-        //endpoint configs, business info and thumbnail still missing
         return dto;
     }
 
+    /**
+     * Map API DTO to backend model
+     *
+     * @param dto API DTO
+     * @return Corresponding mapping API backend model to input DTO
+     * @throws APIManagementException If an error occurs while mapping DTO to model
+     */
     public static API fromDTOtoAPI(APIDTO dto) throws APIManagementException {
 
         APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
@@ -148,13 +167,10 @@ public class APIMappingUtil {
         APIIdentifier apiId = new APIIdentifier(dto.getProvider(), dto.getName(), dto.getVersion());
         org.wso2.carbon.apimgt.api.model.API model = new org.wso2.carbon.apimgt.api.model.API(apiId);
 
-        //if not supertenant append /t/wso2.com/ to context
-        model.setContext(dto.getContext());  //context should change if tenant
+        model.setContext(dto.getContext());
         model.setContextTemplate(dto.getContext());
         model.setDescription(dto.getDescription());
-
         model.setStatus(APIStatus.CREATED);
-
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
         model.setCacheTimeout(dto.getCacheTimeout());
@@ -163,7 +179,6 @@ public class APIMappingUtil {
         if (dto.getSequences() != null) {
             List<SequenceDTO> sequences = dto.getSequences();
 
-            //validate whether provided sequences are available
             for (SequenceDTO sequence : sequences) {
                 if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(sequence.getType())) {
                     model.setInSequence(sequence.getName());
@@ -179,7 +194,6 @@ public class APIMappingUtil {
             model.setSubscriptionAvailability(mapSubscriptionAvailabilityFromDTOtoAPI(dto.getSubscriptionAvailability()));
         }
 
-        //do we need to put validity checks? - specific_tenants
         if (dto.getSubscriptionAvailableTenants() != null) {
             model.setSubscriptionAvailableTenants(dto.getSubscriptionAvailableTenants().toString());
         }
@@ -210,7 +224,6 @@ public class APIMappingUtil {
 
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
-        //dto.setType("");   //how to get type?
         model.setVisibility(mapVisibilityFromDTOtoAPI(dto.getVisibility()));
         if (dto.getVisibleRoles() != null) {
             String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');
@@ -222,12 +235,18 @@ public class APIMappingUtil {
             model.setVisibleRoles(visibleTenants);
         }
 
-        //endpoint configs, business info and thumbnail requires mapping
         return model;
 
     }
 
-    private static String mapVisibilityFromDTOtoAPI(APIDTO.VisibilityEnum visibility) {
+    /**
+     * Map API visibility from Enum in the DTO to String in the backend
+     *
+     * @param visibility Enum containing the visibility value
+     * @return String Corresponding APIConstant which maps with DTO visibility enum
+     * APIManagementException If mapping between backend and DTO level visibility values does not exist
+     */
+    private static String mapVisibilityFromDTOtoAPI(APIDTO.VisibilityEnum visibility) throws APIManagementException {
         switch (visibility) {
             case PUBLIC:
                 return APIConstants.API_GLOBAL_VISIBILITY;
@@ -238,11 +257,19 @@ public class APIMappingUtil {
             case CONTROLLED:
                 return APIConstants.API_CONTROLLED_VISIBILITY;
             default:
-                return null; // how to handle this?
+                throw new APIManagementException("No mapping backend value for " + visibility.name());
         }
     }
-    private static APIDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {
-        switch (visibility) { //public, private,controlled, restricted
+
+    /**
+     * Map API visibility from backend API constant to visibility enum in DTO
+     *
+     * @param visibility API Constant containing visibility value
+     * @return VisibilityEnum Corresponding enum which maps with backend visibility value
+     * APIManagementException If mapping between backend and DTO level visibility values does not exist
+     */
+    private static APIDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) throws APIManagementException {
+        switch (visibility) {
             case APIConstants.API_GLOBAL_VISIBILITY :
                 return APIDTO.VisibilityEnum.PUBLIC;
             case APIConstants.API_PRIVATE_VISIBILITY :
@@ -252,37 +279,51 @@ public class APIMappingUtil {
             case APIConstants.API_CONTROLLED_VISIBILITY :
                 return APIDTO.VisibilityEnum.CONTROLLED;
             default:
-                return null; // how to handle this?
+                throw new APIManagementException("No DTO level mapping exist for " + visibility);
         }
     }
 
+    /**
+     * Map API subscription availability from backend API constant to enum in DTO
+     *
+     * @param subscriptionAvailability Backend constant value
+     * @return SubscriptionAvailabilityEnum Corresponding enum which maps with backend value
+     * APIManagementException If mapping between backend and DTO level subscription values does not exist
+     */
     private static APIDTO.SubscriptionAvailabilityEnum mapSubscriptionAvailabilityFromAPItoDTO(
-            String subscriptionAvailability) {
+        String subscriptionAvailability) throws APIManagementException {
 
         switch (subscriptionAvailability) {
             case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT :
-                return APIDTO.SubscriptionAvailabilityEnum.current_tenant;
+                return APIDTO.SubscriptionAvailabilityEnum.CURRENT_TENANT;
             case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS :
-                return APIDTO.SubscriptionAvailabilityEnum.all_tenants;
+                return APIDTO.SubscriptionAvailabilityEnum.ALL_TENANTS;
             case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS :
-                return APIDTO.SubscriptionAvailabilityEnum.specific_tenants;
+                return APIDTO.SubscriptionAvailabilityEnum.SPECIFIC_TENANTS;
             default:
-                return null; // how to handle this?
+                throw new APIManagementException("No mapping DTO level value exist for " + subscriptionAvailability);
         }
 
     }
 
+    /**
+     * Map API subscription availability from Enum in the DTO to String in the backend
+     *
+     * @param subscriptionAvailability Enum containing the subscription availability value
+     * @return String Corresponding mapping value for enum in the DTO
+     * APIManagementException If mapping between backend and DTO level subscription values does not exist
+     */
     private static String mapSubscriptionAvailabilityFromDTOtoAPI(
-            APIDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
+        APIDTO.SubscriptionAvailabilityEnum subscriptionAvailability) throws APIManagementException {
         switch (subscriptionAvailability) {
-            case current_tenant:
+            case CURRENT_TENANT:
                 return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
-            case all_tenants:
+            case ALL_TENANTS:
                 return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
-            case specific_tenants:
+            case SPECIFIC_TENANTS:
                 return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
             default:
-                return null; // how to handle this? 500 or 400
+                throw new APIManagementException("No mapping backend value for " + subscriptionAvailability.name());
         }
 
     }
