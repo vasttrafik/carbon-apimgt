@@ -26,6 +26,8 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -44,14 +46,14 @@ import java.util.Map;
 
 public class APIKeyValidatorClient {
 
+	private static final Log log = LogFactory.getLog(APIKeyValidatorClient.class);
+	
 	private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
-	private static APIKeyValidationServiceStub keyValidationServiceStub;
-	private static Options options;
+	private APIKeyValidationServiceStub keyValidationServiceStub;
 
-	private static String serviceURL;
-	private static String username;
-	private static String password;
+	private String username;
+	private String password;
 	
 	private static LinkedHashMap<String, Long> cookieCache = new LinkedHashMap<String, Long>(){
 
@@ -62,15 +64,19 @@ public class APIKeyValidatorClient {
 
 		@Override
         protected boolean removeEldestEntry(Map.Entry eldest) {
-            // Oldest entry of the cache will be removed when hitting max cache size of 5.
-            return size() > 5;
+            // Oldest entry of the cache will be removed when hitting max cache size of 4.
+            return size() > 4;
         }
 
     };
+    
+    static {
+    	
+    	log.info("APIKeyValidatorClient initiated");
+    	
+    }
 
 	public APIKeyValidatorClient() throws APISecurityException {
-
-		if (serviceURL == null || username == null || password == null) {
 
 			APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
 			String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
@@ -81,16 +87,12 @@ public class APIKeyValidatorClient {
 						"Required connection details for the key management server not provided");
 			}
 
-		}
-
-		if (keyValidationServiceStub == null || options == null) {
-
 			try {
 				ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null,
 						null);
 				keyValidationServiceStub = new APIKeyValidationServiceStub(ctx, serviceURL + "APIKeyValidationService");
 				ServiceClient client = keyValidationServiceStub._getServiceClient();
-				options = client.getOptions();
+				Options options = client.getOptions();
 				options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
 				options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
 				options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIMEOUT_IN_MILLIS);
@@ -102,7 +104,6 @@ public class APIKeyValidatorClient {
 						"Error while initializing the API key validation stub", axisFault);
 			}
 
-		}
 	}
 
 	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
@@ -178,6 +179,7 @@ public class APIKeyValidatorClient {
 			ServiceContext serviceContext = keyValidationServiceStub._getServiceClient().getLastOperationContext()
 					.getServiceContext();
 			addCookie((String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING));
+			
 			ArrayList<URITemplate> templates = new ArrayList<URITemplate>();
 			for (org.wso2.carbon.apimgt.api.model.xsd.URITemplate aDto : dto) {
 				URITemplate temp = toTemplates(aDto);
@@ -218,10 +220,10 @@ public class APIKeyValidatorClient {
                    } else {
                        cookieString = key;
                    }
-               }
-               
+               } 
            }
        }
+       
        return cookieString;
    }
 
@@ -232,8 +234,9 @@ public class APIKeyValidatorClient {
    */
    public static void addCookie(String cookie) {
 	   
-	   if(cookie != null && !cookie.equals("") && !cookieCache.containsKey(cookie))
+	   if(cookie != null && !cookie.equals("") && !cookieCache.containsKey(cookie) && !cookie.contains(",")) {
 		   cookieCache.put(cookie, System.currentTimeMillis());
-	   
+	   }
+
    }
 }
