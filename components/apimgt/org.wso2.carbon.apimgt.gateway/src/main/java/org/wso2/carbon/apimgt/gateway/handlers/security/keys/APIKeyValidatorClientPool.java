@@ -32,13 +32,14 @@ public class APIKeyValidatorClientPool {
 
     private APIKeyValidatorClientPool() {
         log.debug("Initializing API key validator client pool");
+
         clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
             @Override
             public Object makeObject() throws Exception {
                 log.debug("Initializing new APIKeyValidatorClient instance");
                 return new APIKeyValidatorClient();
             }
-        }, 50, 20);
+        }, 200, 200);
     }
 
     public static APIKeyValidatorClientPool getInstance() {

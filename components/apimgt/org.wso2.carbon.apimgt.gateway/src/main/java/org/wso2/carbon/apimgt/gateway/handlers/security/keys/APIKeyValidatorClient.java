@@ -48,7 +48,7 @@ public class APIKeyValidatorClient {
 
 	private static final Log log = LogFactory.getLog(APIKeyValidatorClient.class);
 	
-	private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
+	private static final int TIMEOUT_IN_MILLIS = 60 * 60 * 1000;
 
 	private APIKeyValidationServiceStub keyValidationServiceStub;
 
@@ -71,7 +71,7 @@ public class APIKeyValidatorClient {
     };
     
     static {
-    	
+
     	log.info("APIKeyValidatorClient initiated");
     	
     }
@@ -136,6 +136,7 @@ public class APIKeyValidatorClient {
 			addCookie((String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING));
 			return toDTO(dto);
 		} catch (Exception e) {
+			log.error(e);
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
 					"Error while accessing backend services for API key validation", e);
 		}
@@ -187,6 +188,7 @@ public class APIKeyValidatorClient {
 			}
 			return templates;
 		} catch (Exception e) {
+			log.error(e);
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
 					"Error while accessing backend services for API key validation", e);
 		}
